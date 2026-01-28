@@ -1,0 +1,31 @@
+Production folder structure
+
+lib/
+  app/
+    summarix_app.dart
+  core/
+    utils/
+      string_utils.dart
+    widgets/
+      background_layer.dart
+      dotted_circle.dart
+  features/
+    auth/
+      presentation/
+        auth_screen.dart
+    home/
+      presentation/
+        home_screen.dart
+    onboarding/
+      presentation/
+        onboarding_flow.dart
+    startup/
+      presentation/
+        start_gate.dart
+    stub/
+      presentation/
+        stub_screen.dart
+    upload/
+      presentation/
+        upload_flow_screen.dart
+  main.dart
