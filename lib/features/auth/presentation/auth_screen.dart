@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/widgets/background_layer.dart';
-import '../../../core/widgets/dotted_circle.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
@@ -59,12 +58,21 @@ class AuthScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                DottedCircle(
-                  diameter: 120,
-                  child: Icon(
-                    Icons.lock_outline,
-                    size: 48,
-                    color: const Color(0xFF1A6FA3),
+                Container(
+                  height: 150,
+                  width: 150,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFEAF4FA),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: ClipOval(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Image.asset(
+                        'assets/images/auth_logo.png',
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

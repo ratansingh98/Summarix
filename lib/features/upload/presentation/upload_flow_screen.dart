@@ -1,7 +1,9 @@
 import 'dart:async';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/widgets/background_layer.dart';
 import '../../../core/widgets/dotted_circle.dart';
@@ -20,6 +22,12 @@ class _UploadFlowScreenState extends State<UploadFlowScreen> {
   double _progress = 0;
   bool _isUploading = false;
   Timer? _timer;
+  final Map<String, bool> _options = {
+    'Lab results': true,
+    'Imaging notes': false,
+    'Medication list': true,
+    'Doctor comments': false,
+  };
 
   @override
   void dispose() {
@@ -35,6 +43,16 @@ class _UploadFlowScreenState extends State<UploadFlowScreen> {
     );
     if (result != null && result.files.isNotEmpty) {
       setState(() => _fileName = result.files.first.name);
+      _startFakeUpload();
+    }
+  }
+
+  Future<void> _captureScan() async {
+    if (_isUploading) return;
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() => _fileName = image.name);
       _startFakeUpload();
     }
   }
@@ -147,7 +165,7 @@ class _UploadFlowScreenState extends State<UploadFlowScreen> {
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: _pickFile,
+                            onPressed: widget.scanMode ? _captureScan : _pickFile,
                             icon: const Icon(Icons.add_circle_outline),
                             label: FittedBox(
                               fit: BoxFit.scaleDown,
@@ -170,8 +188,15 @@ class _UploadFlowScreenState extends State<UploadFlowScreen> {
                         const SizedBox(width: 12),
                         OutlinedButton(
                           onPressed: _progress == 1
-                              ? () => Navigator.of(context)
-                                  .pushNamed('/stub/ai-review')
+                              ? () async {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.setBool(
+                                      'include_options_hidden', true);
+                                  if (!context.mounted) return;
+                                  Navigator.of(context)
+                                      .pushNamed('/stub/ai-review');
+                                }
                               : null,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF1A6FA3),
@@ -194,6 +219,14 @@ class _UploadFlowScreenState extends State<UploadFlowScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              if (_progress == 1) ...[
+                _IncludeOptionsCard(
+                  options: _options,
+                  onChanged: (key, value) =>
+                      setState(() => _options[key] = value),
+                ),
+                const SizedBox(height: 20),
+              ],
               _InfoStrip(
                 icon: Icons.lock_outline,
                 text:
@@ -277,6 +310,50 @@ class _ReviewTimeline extends StatelessWidget {
             title: 'Doctor review',
             subtitle: '12-24 hours',
             icon: Icons.medical_services_outlined,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IncludeOptionsCard extends StatelessWidget {
+  const _IncludeOptionsCard({
+    required this.options,
+    required this.onChanged,
+  });
+
+  final Map<String, bool> options;
+  final void Function(String key, bool value) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FCFE),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFD3E7F3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Include in summary',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 8),
+          ...options.entries.map(
+            (entry) => SwitchListTile.adaptive(
+              value: entry.value,
+              contentPadding: EdgeInsets.zero,
+              activeColor: const Color(0xFF1A6FA3),
+              title: Text(entry.key),
+              subtitle: const Text('1 token'),
+              onChanged: (value) => onChanged(entry.key, value),
+            ),
           ),
         ],
       ),

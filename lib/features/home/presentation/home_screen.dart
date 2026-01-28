@@ -12,7 +12,6 @@ class SummarixHome extends StatefulWidget {
 }
 
 class _SummarixHomeState extends State<SummarixHome> {
-  bool _aiMode = true;
   final Map<String, bool> _options = {
     'Lab results': true,
     'Imaging notes': false,
@@ -49,24 +48,14 @@ class _SummarixHomeState extends State<SummarixHome> {
                     index: _tabIndex,
                     children: [
                       _SummarizeTab(
-                        aiMode: _aiMode,
                         options: _options,
                         onProfileTap: () => _openStub('profile'),
                         onLogout: _logout,
                         onUpload: () =>
                             Navigator.of(context).pushNamed('/upload'),
                         onScan: () => Navigator.of(context).pushNamed('/scan'),
-                        onToggleMode: (value) =>
-                            setState(() => _aiMode = value),
-                        onPrimary: () => _openStub(
-                          _aiMode ? 'ai-review' : 'manual-review',
-                        ),
+                        onPrimary: () => _openStub('doctor-review'),
                         onSecondary: () => _openStub('schedule-review'),
-                        onOptionChanged: (key, value) =>
-                            setState(() => _options[key] = value),
-                        onPreview: () => _openStub('summary-preview'),
-                        onOnboarding: () =>
-                            Navigator.of(context).pushNamed('/onboarding'),
                         onChat: () => _openStub('reviewer-chat'),
                         onDownload: () => _openStub('download-summary'),
                         onShare: () => _openStub('share-summary'),
@@ -111,36 +100,26 @@ class _SummarixHomeState extends State<SummarixHome> {
 
 class _SummarizeTab extends StatelessWidget {
   const _SummarizeTab({
-    required this.aiMode,
     required this.options,
     required this.onProfileTap,
     required this.onLogout,
     required this.onUpload,
     required this.onScan,
-    required this.onToggleMode,
     required this.onPrimary,
     required this.onSecondary,
-    required this.onOptionChanged,
-    required this.onPreview,
-    required this.onOnboarding,
     required this.onChat,
     required this.onDownload,
     required this.onShare,
     required this.onExport,
   });
 
-  final bool aiMode;
   final Map<String, bool> options;
   final VoidCallback onProfileTap;
   final VoidCallback onLogout;
   final VoidCallback onUpload;
   final VoidCallback onScan;
-  final ValueChanged<bool> onToggleMode;
   final VoidCallback onPrimary;
   final VoidCallback onSecondary;
-  final void Function(String key, bool value) onOptionChanged;
-  final VoidCallback onPreview;
-  final VoidCallback onOnboarding;
   final VoidCallback onChat;
   final VoidCallback onDownload;
   final VoidCallback onShare;
@@ -163,81 +142,9 @@ class _SummarizeTab extends StatelessWidget {
           onScan: onScan,
         ),
         const SizedBox(height: 24),
-        _ModeSwitcher(
-          aiMode: aiMode,
-          onToggle: onToggleMode,
-        ),
-        const SizedBox(height: 16),
         _ModeDetails(
-          aiMode: aiMode,
           onPrimary: onPrimary,
           onSecondary: onSecondary,
-        ),
-        const SizedBox(height: 16),
-        _OptionsCard(
-          options: options,
-          onChanged: onOptionChanged,
-          onPreview: onPreview,
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'From report to clarity',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'A guided flow inspired by medical onboarding cards.',
-        ),
-        const SizedBox(height: 16),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 640;
-            return Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                _FeatureCard(
-                  title: 'Clinical-grade checks',
-                  description:
-                      'AI highlights abnormalities with confidence scores.',
-                  icon: Icons.verified_outlined,
-                  width: isWide
-                      ? (constraints.maxWidth - 16) / 2
-                      : constraints.maxWidth,
-                ),
-                _FeatureCard(
-                  title: 'Full spectrum summary',
-                  description: 'Vitals, labs, imaging, and notes in one brief.',
-                  icon: Icons.layers_outlined,
-                  width: isWide
-                      ? (constraints.maxWidth - 16) / 2
-                      : constraints.maxWidth,
-                ),
-                _FeatureCard(
-                  title: 'Caring clinicians',
-                  description: 'Doctors annotate your report with practical tips.',
-                  icon: Icons.people_outline,
-                  width: isWide
-                      ? (constraints.maxWidth - 16) / 2
-                      : constraints.maxWidth,
-                ),
-                _FeatureCard(
-                  title: 'Rehab-ready guidance',
-                  description:
-                      'Get safe next steps and follow-up reminders.',
-                  icon: Icons.health_and_safety_outlined,
-                  width: isWide
-                      ? (constraints.maxWidth - 16) / 2
-                      : constraints.maxWidth,
-                ),
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: 24),
-        _StepperSection(
-          onSkip: onOnboarding,
-          onNext: onOnboarding,
         ),
         const SizedBox(height: 24),
         _StatusBoard(
@@ -249,7 +156,7 @@ class _SummarizeTab extends StatelessWidget {
           onShare: onShare,
           onExport: onExport,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         Align(
           alignment: Alignment.center,
           child: Text(
@@ -425,6 +332,29 @@ class _ProfileTab extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const _AboutPage(),
+            ),
+          ),
+          icon: const Icon(Icons.info_outline),
+          label: const FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('About Summarix'),
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF1A6FA3),
+            side: const BorderSide(color: Color(0xFF9AC7DD)),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            minimumSize: const Size(0, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
           onPressed: onLogout,
           icon: const Icon(Icons.logout),
           label: const FittedBox(
@@ -442,6 +372,89 @@ class _ProfileTab extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AboutPage extends StatelessWidget {
+  const _AboutPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('About'),
+        backgroundColor: Colors.transparent,
+      ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const BackgroundLayer(),
+          SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              children: [
+                Text(
+                  'From report to clarity',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'A guided flow inspired by medical onboarding cards.',
+                ),
+                const SizedBox(height: 16),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isWide = constraints.maxWidth > 640;
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
+                        _FeatureCard(
+                          title: 'Clinical-grade checks',
+                          description:
+                              'AI highlights abnormalities with confidence scores.',
+                          icon: Icons.verified_outlined,
+                          width: isWide
+                              ? (constraints.maxWidth - 16) / 2
+                              : constraints.maxWidth,
+                        ),
+                        _FeatureCard(
+                          title: 'Full spectrum summary',
+                          description:
+                              'Vitals, labs, imaging, and notes in one brief.',
+                          icon: Icons.layers_outlined,
+                          width: isWide
+                              ? (constraints.maxWidth - 16) / 2
+                              : constraints.maxWidth,
+                        ),
+                        _FeatureCard(
+                          title: 'Caring clinicians',
+                          description:
+                              'Doctors annotate your report with practical tips.',
+                          icon: Icons.people_outline,
+                          width: isWide
+                              ? (constraints.maxWidth - 16) / 2
+                              : constraints.maxWidth,
+                        ),
+                        _FeatureCard(
+                          title: 'Rehab-ready guidance',
+                          description:
+                              'Get safe next steps and follow-up reminders.',
+                          icon: Icons.health_and_safety_outlined,
+                          width: isWide
+                              ? (constraints.maxWidth - 16) / 2
+                              : constraints.maxWidth,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -656,98 +669,12 @@ class _HeroCard extends StatelessWidget {
   }
 }
 
-class _ModeSwitcher extends StatelessWidget {
-  const _ModeSwitcher({required this.aiMode, required this.onToggle});
-
-  final bool aiMode;
-  final ValueChanged<bool> onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE6F3FA),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFB8D6E7)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _ModeChip(
-              label: 'AI Review',
-              active: aiMode,
-              onTap: () => onToggle(true),
-            ),
-          ),
-          Expanded(
-            child: _ModeChip(
-              label: 'Manual Review',
-              active: !aiMode,
-              onTap: () => onToggle(false),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModeChip extends StatelessWidget {
-  const _ModeChip({
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 240),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: active
-              ? const [
-                  BoxShadow(
-                    color: Color(0x1A2E6A95),
-                    blurRadius: 10,
-                    offset: Offset(0, 6),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: active
-                      ? const Color(0xFF1A6FA3)
-                      : const Color(0xFF6B8CA1),
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ModeDetails extends StatelessWidget {
   const _ModeDetails({
-    required this.aiMode,
     required this.onPrimary,
     required this.onSecondary,
   });
 
-  final bool aiMode;
   final VoidCallback onPrimary;
   final VoidCallback onSecondary;
 
@@ -775,21 +702,19 @@ class _ModeDetails extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      aiMode ? Icons.flash_on : Icons.medical_services,
+                      Icons.medical_services,
                       color: const Color(0xFF1A6FA3),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      aiMode ? 'AI Review' : 'Manual Review',
+                      'Doctor Review',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  aiMode
-                      ? 'Instant results using 20 tokens per report.'
-                      : 'Doctor-assisted review within 12-24 hours.',
+                  'Doctor-assisted review within 12-24 hours.',
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall
@@ -808,9 +733,9 @@ class _ModeDetails extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: FittedBox(
+                  child: const FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(aiMode ? 'Start AI review' : 'Request manual'),
+                    child: Text('Request doctor review'),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -876,6 +801,7 @@ class _OptionsCard extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               activeColor: const Color(0xFF1A6FA3),
               title: Text(entry.key),
+              subtitle: const Text('1 token'),
               onChanged: (value) => onChanged(entry.key, value),
             ),
           ),
@@ -957,75 +883,6 @@ class _FeatureCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _StepperSection extends StatelessWidget {
-  const _StepperSection({required this.onSkip, required this.onNext});
-
-  final VoidCallback onSkip;
-  final VoidCallback onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFD7EAF4)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) {
-              final active = index == 2;
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: active ? 18 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: active
-                      ? const Color(0xFF1A6FA3)
-                      : const Color(0xFFD1E3EE),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: onSkip,
-                child: const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('Skip'),
-                ),
-              ),
-              OutlinedButton(
-                onPressed: onNext,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF1A6FA3),
-                  side: const BorderSide(color: Color(0xFF9AC7DD)),
-                  minimumSize: const Size(0, 44),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('Next'),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
